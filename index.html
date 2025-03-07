@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multiplication Practice</title>
+    <title>Multiplication Game</title>
     <style>
         :root {
             /* Light mode colors */
@@ -22,8 +22,6 @@
             --incorrect: #C62828;
             --elevation-1: 0 2px 4px rgba(0, 0, 0, 0.1);
             --elevation-2: 0 4px 8px rgba(0, 0, 0, 0.12);
-            
-            /* Dark mode colors will be set via JS */
         }
 
         [data-theme="dark"] {
@@ -70,8 +68,38 @@
 
         h1 {
             color: var(--primary-700);
-            margin-bottom: 24px;
+            margin-bottom: 12px;
             font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding: 12px;
+            background-color: var(--primary-100);
+            border-radius: 12px;
+            transition: background-color 0.3s ease;
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-700);
+            transition: color 0.3s ease;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--on-surface);
+            opacity: 0.8;
             transition: color 0.3s ease;
         }
 
@@ -82,6 +110,7 @@
             margin-bottom: 24px;
             box-shadow: var(--elevation-1);
             transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
         }
 
         .question {
@@ -89,6 +118,22 @@
             font-weight: 500;
             color: var(--on-surface);
             transition: color 0.3s ease;
+        }
+
+        .timer {
+            position: absolute;
+            bottom: 8px;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: var(--primary-600);
+            transform-origin: left;
+            transform: scaleX(1);
+            transition: transform 10s linear;
+        }
+
+        .timer.active {
+            transform: scaleX(0);
         }
 
         .answer-form {
@@ -194,6 +239,210 @@
         [data-theme="dark"] .theme-icon {
             transform: rotate(180deg);
         }
+
+        .points-animation {
+            position: absolute;
+            font-weight: bold;
+            opacity: 0;
+            pointer-events: none;
+            animation: points-fly 1.5s ease forwards;
+        }
+
+        @keyframes points-fly {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50px);
+            }
+        }
+
+        .streak-badge {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background-color: var(--primary-700);
+            color: var(--on-primary);
+            border-radius: 12px;
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .level-up {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .level-up.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .level-up-content {
+            background-color: var(--surface);
+            padding: 32px;
+            border-radius: 24px;
+            text-align: center;
+            max-width: 80%;
+            animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes pop-in {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .level-title {
+            color: var(--primary-700);
+            font-size: 28px;
+            margin-bottom: 16px;
+        }
+
+        .level-message {
+            margin-bottom: 24px;
+            font-size: 16px;
+        }
+
+        .continue-button {
+            background-color: var(--primary-600);
+            color: var(--on-primary);
+            padding: 12px 24px;
+            border: none;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        /* Start Menu Styles */
+        .game-container {
+            display: none; /* Hidden by default */
+        }
+        
+        .start-menu {
+            text-align: center;
+            max-width: 500px;
+        }
+        
+        .logo {
+            font-size: 42px;
+            font-weight: 700;
+            color: var(--primary-700);
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+            animation: fade-in 1s ease;
+        }
+        
+        @keyframes fade-in {
+            0% { opacity: 0; transform: translateY(-20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        .menu-card {
+            background-color: var(--surface);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: var(--elevation-2);
+            margin-bottom: 20px;
+            animation: slide-up 0.5s ease 0.2s both;
+        }
+        
+        @keyframes slide-up {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        .menu-title {
+            font-size: 24px;
+            color: var(--primary-700);
+            margin-bottom: 16px;
+        }
+        
+        .instructions {
+            text-align: left;
+            margin-bottom: 24px;
+            line-height: 1.6;
+            color: var(--on-surface);
+        }
+        
+        .instruction-item {
+            display: flex;
+            margin-bottom: 12px;
+            align-items: flex-start;
+        }
+        
+        .instruction-number {
+            background-color: var(--primary-600);
+            color: var(--on-primary);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        .instruction-text {
+            flex: 1;
+        }
+        
+        .start-button {
+            background-color: var(--primary-600);
+            color: var(--on-primary);
+            padding: 16px 40px;
+            border-radius: 20px;
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            animation: pulse 2s infinite;
+        }
+        
+        .start-button:hover {
+            transform: scale(1.05);
+            background-color: var(--primary-700);
+        }
+        
+        .difficulty-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .difficulty-option {
+            background-color: var(--primary-100);
+            border: 2px solid var(--primary-300);
+            border-radius: 12px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .difficulty-option.selected {
+            background-color: var(--primary-300);
+            border-color: var(--primary-600);
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -204,32 +453,143 @@
         </svg>
     </div>
 
-    <div class="container">
-        <h1>Multiplication Practice</h1>
-        <div class="question-card">
-            <div class="question" id="question"></div>
+    <!-- Start Menu -->
+    <div class="start-menu" id="start-menu">
+        <div class="logo">Multiplication Game</div>
+        
+        <div class="menu-card">
+            <div class="menu-title">How to Play</div>
+            <div class="instructions">
+                <div class="instruction-item">
+                    <div class="instruction-number">1</div>
+                    <div class="instruction-text">Solve multiplication problems as quickly as you can.</div>
+                </div>
+                <div class="instruction-item">
+                    <div class="instruction-number">2</div>
+                    <div class="instruction-text">Earn points for each correct answer. The faster you answer, the more points you get!</div>
+                </div>
+                <div class="instruction-item">
+                    <div class="instruction-number">3</div>
+                    <div class="instruction-text">Build a streak by answering correctly multiple times in a row for bonus points.</div>
+                </div>
+                <div class="instruction-item">
+                    <div class="instruction-number">4</div>
+                    <div class="instruction-text">Level up as you earn more points. Each level brings harder questions and bigger rewards!</div>
+                </div>
+            </div>
+            
+            <div class="menu-title">Select Difficulty</div>
+            <div class="difficulty-selector">
+                <div class="difficulty-option selected" data-difficulty="easy">Easy</div>
+                <div class="difficulty-option" data-difficulty="medium">Medium</div>
+                <div class="difficulty-option" data-difficulty="hard">Hard</div>
+            </div>
+            
+            <button class="start-button" id="start-game-button">Start Game</button>
         </div>
-        <div class="answer-form">
-            <input type="number" id="answer" placeholder="Your answer" autocomplete="off">
-            <button id="check-button">Check Answer</button>
-            <button id="new-question" class="new-question">New Question</button>
+    </div>
+
+    <!-- Game UI -->
+    <div class="game-container" id="game-container">
+        <div class="container">
+            <h1>Multiplication Game</h1>
+            
+            <div class="game-stats">
+                <div class="stat">
+                    <div class="stat-value" id="score">0</div>
+                    <div class="stat-label">POINTS</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="streak">0</div>
+                    <div class="stat-label">STREAK</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="level">1</div>
+                    <div class="stat-label">LEVEL</div>
+                </div>
+            </div>
+            
+            <div class="question-card">
+                <div class="streak-badge" id="streak-badge">STREAK: 3x</div>
+                <div class="question" id="question"></div>
+                <div class="timer" id="timer"></div>
+            </div>
+            
+            <div class="answer-form">
+                <input type="number" id="answer" placeholder="Your answer" autocomplete="off">
+                <button id="check-button">Check Answer</button>
+            </div>
+            
+            <div class="result" id="result"></div>
+            
+            <button id="back-to-menu" class="new-question">Back to Menu</button>
         </div>
-        <div class="result" id="result"></div>
+    </div>
+
+    <div class="level-up" id="level-up">
+        <div class="level-up-content">
+            <div class="level-title">Level Up!</div>
+            <div class="level-message" id="level-message">You've reached Level 2!</div>
+            <button class="continue-button" id="continue-button">Continue</button>
+        </div>
     </div>
 
     <script>
-        // Variable to track current theme
+        // Game state variables
         let currentTheme = 'light';
+        let score = 0;
+        let streak = 0;
+        let level = 1;
+        let timer;
+        let timeLimit = 10000; // 10 seconds
+        let pointsPerQuestion = 10;
+        let streakMultiplier = 1;
+        let currentDifficulty = 'easy';
         
         // Function to generate a random number between min and max (inclusive)
         function getRandomNumber(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
         
-        // Function to generate a new multiplication problem
+        // Function to generate a new multiplication problem based on level and difficulty
         function generateQuestion() {
-            const num1 = getRandomNumber(1, 10);
-            const num2 = getRandomNumber(1, 10);
+            // Clear any existing timer
+            clearTimeout(timer);
+            
+            let num1, num2;
+            let maxNum = Math.min(10, 3 + Math.floor(level * 1.5)); // Base max number
+            
+            // Adjust difficulty based on selected option
+            switch (currentDifficulty) {
+                case 'easy':
+                    maxNum = Math.min(10, 2 + Math.floor(level * 1.2));
+                    timeLimit = 12000 - (level - 1) * 500; // More time for easy mode
+                    break;
+                case 'medium':
+                    maxNum = Math.min(12, 3 + Math.floor(level * 1.5));
+                    timeLimit = 10000 - (level - 1) * 750; // Default time
+                    break;
+                case 'hard':
+                    maxNum = Math.min(15, 5 + Math.floor(level * 1.8));
+                    timeLimit = 8000 - (level - 1) * 1000; // Less time for hard mode
+                    break;
+            }
+            
+            // Ensure minimum time limit
+            timeLimit = Math.max(3000, timeLimit);
+            
+            // Generate numbers based on current level and difficulty
+            if (level <= 2) {
+                num1 = getRandomNumber(1, maxNum);
+                num2 = getRandomNumber(1, maxNum);
+            } else if (level <= 4) {
+                num1 = getRandomNumber(2, maxNum);
+                num2 = getRandomNumber(2, maxNum);
+            } else {
+                num1 = getRandomNumber(3, maxNum + 2);
+                num2 = getRandomNumber(3, maxNum + 2);
+            }
+            
             const questionElement = document.getElementById('question');
             questionElement.textContent = `${num1} × ${num2} = ?`;
             
@@ -241,10 +601,53 @@
             document.getElementById('result').className = 'result';
             document.getElementById('answer').value = '';
             document.getElementById('answer').focus();
+            
+            // Reset and start the timer
+            const timerElement = document.getElementById('timer');
+            timerElement.style.transition = 'none';
+            timerElement.classList.remove('active');
+            
+            // Force a reflow to ensure the transition is applied on the next frame
+            void timerElement.offsetWidth;
+            
+            // Start the timer animation
+            timerElement.style.transition = `transform ${timeLimit / 1000}s linear`;
+            timerElement.classList.add('active');
+            
+            // Set timer for automatic checking
+            timer = setTimeout(() => {
+                if (document.getElementById('answer').value === '') {
+                    // Time's up without an answer
+                    const resultElement = document.getElementById('result');
+                    resultElement.textContent = `Time's up! The answer is ${questionElement.dataset.answer}.`;
+                    resultElement.className = 'result incorrect';
+                    resetStreak();
+                    
+                    // Generate a new question after a delay
+                    setTimeout(generateQuestion, 2000);
+                }
+            }, timeLimit);
+            
+            // Show/update streak badge
+            updateStreakBadge();
+        }
+        
+        // Function to update streak badge
+        function updateStreakBadge() {
+            const streakBadge = document.getElementById('streak-badge');
+            if (streak >= 3) {
+                streakBadge.textContent = `STREAK: ${streak}x`;
+                streakBadge.style.display = 'block';
+            } else {
+                streakBadge.style.display = 'none';
+            }
         }
         
         // Function to check the answer
         function checkAnswer() {
+            // Clear the timer
+            clearTimeout(timer);
+            
             const userAnswer = parseInt(document.getElementById('answer').value);
             const correctAnswer = parseInt(document.getElementById('question').dataset.answer);
             const resultElement = document.getElementById('result');
@@ -264,12 +667,116 @@
             }
             
             if (userAnswer === correctAnswer) {
+                // Correct answer
                 resultElement.textContent = 'Correct! 🎉';
                 resultElement.className = 'result correct';
+                
+                // Increase streak
+                streak++;
+                streakMultiplier = 1 + Math.floor(streak / 3) * 0.5;
+                document.getElementById('streak').textContent = streak;
+                
+                // Calculate points based on level and streak
+                const earnedPoints = Math.round(pointsPerQuestion * level * streakMultiplier);
+                score += earnedPoints;
+                document.getElementById('score').textContent = score;
+                
+                // Show points animation
+                showPointsAnimation(earnedPoints);
+                
+                // Check for level up
+                checkLevelUp();
+                
+                // Generate a new question after a brief delay
+                setTimeout(generateQuestion, 1000);
             } else {
+                // Incorrect answer
                 resultElement.textContent = `Incorrect. The answer is ${correctAnswer}.`;
                 resultElement.className = 'result incorrect';
+                resetStreak();
+                
+                // Generate a new question after a delay
+                setTimeout(generateQuestion, 2000);
             }
+        }
+        
+        // Function to reset streak
+        function resetStreak() {
+            streak = 0;
+            streakMultiplier = 1;
+            document.getElementById('streak').textContent = streak;
+            updateStreakBadge();
+        }
+        
+        // Function to show points animation
+        function showPointsAnimation(points) {
+            const animation = document.createElement('div');
+            animation.className = 'points-animation';
+            animation.textContent = `+${points}`;
+            animation.style.color = 'var(--correct)';
+            animation.style.fontSize = '20px';
+            
+            const questionCard = document.querySelector('.question-card');
+            const rect = questionCard.getBoundingClientRect();
+            
+            animation.style.left = '50%';
+            animation.style.top = `${rect.bottom}px`;
+            
+            document.body.appendChild(animation);
+            
+            // Remove the element after animation completes
+            setTimeout(() => {
+                animation.remove();
+            }, 1500);
+        }
+        
+        // Function to check for level up
+        function checkLevelUp() {
+            const newLevel = Math.floor(score / 100) + 1;
+            
+            if (newLevel > level) {
+                // Level up!
+                level = newLevel;
+                document.getElementById('level').textContent = level;
+                
+                // Adjust difficulty
+                timeLimit = Math.max(3000, 10000 - (level - 1) * 1000); // Reduce time as level increases
+                
+                // Show level up modal
+                const levelUp = document.getElementById('level-up');
+                const levelMessage = document.getElementById('level-message');
+                
+                levelMessage.textContent = `You've reached Level ${level}!`;
+                levelUp.classList.add('show');
+            }
+        }
+        
+        // Function to start the game
+        function startGame() {
+            // Hide start menu and show game container
+            document.getElementById('start-menu').style.display = 'none';
+            document.getElementById('game-container').style.display = 'block';
+            
+            // Reset game state
+            score = 0;
+            streak = 0;
+            level = 1;
+            document.getElementById('score').textContent = score;
+            document.getElementById('streak').textContent = streak;
+            document.getElementById('level').textContent = level;
+            
+            // Generate first question
+            generateQuestion();
+        }
+        
+        // Function to go back to main menu
+        function backToMenu() {
+            // Clear any existing timer
+            clearTimeout(timer);
+            
+            // Hide game container and show start menu
+            document.getElementById('game-container').style.display = 'none';
+            document.getElementById('start-menu').style.display = 'block';
         }
         
         // Theme toggle functionality
@@ -278,20 +785,46 @@
             document.documentElement.setAttribute('data-theme', currentTheme);
         }
         
-        // Generate a question when the page loads
-        window.addEventListener('DOMContentLoaded', () => {
-            generateQuestion();
+        // Function to select difficulty
+        function selectDifficulty(difficultyLevel) {
+            // Remove selected class from all options
+            document.querySelectorAll('.difficulty-option').forEach(option => {
+                option.classList.remove('selected');
+            });
             
-            // Add event listeners
+            // Add selected class to clicked option
+            document.querySelector(`.difficulty-option[data-difficulty="${difficultyLevel}"]`).classList.add('selected');
+            
+            // Set current difficulty
+            currentDifficulty = difficultyLevel;
+        }
+        
+        // Initialize the game
+        window.addEventListener('DOMContentLoaded', () => {
+            // Add event listeners for game mechanics
             document.getElementById('check-button').addEventListener('click', checkAnswer);
-            document.getElementById('new-question').addEventListener('click', generateQuestion);
             document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+            document.getElementById('continue-button').addEventListener('click', () => {
+                document.getElementById('level-up').classList.remove('show');
+                generateQuestion(); // Generate a new question after level up
+            });
             
             // Allow pressing Enter to submit
             document.getElementById('answer').addEventListener('keyup', function(event) {
                 if (event.key === 'Enter') {
                     checkAnswer();
                 }
+            });
+            
+            // Start menu event listeners
+            document.getElementById('start-game-button').addEventListener('click', startGame);
+            document.getElementById('back-to-menu').addEventListener('click', backToMenu);
+            
+            // Difficulty selector event listeners
+            document.querySelectorAll('.difficulty-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    selectDifficulty(this.dataset.difficulty);
+                });
             });
         });
     </script>
